@@ -35,7 +35,7 @@ for set_data in ["public_train", "public_test"]:
         s = "train"
     elif set_data == "public_test":
         s = "val"
-    path = "/home/ubuntu/shared/{}/pill/".format(set_data)
+    path = "../../input/vaipepill2022/{}/pill/".format(set_data)
     for file in tqdm(os.listdir(osp.join(path, "label"))):
         if file.endswith(".json"):
             with open(osp.join(path, "label", file)) as f:
