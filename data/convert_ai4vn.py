@@ -5,6 +5,9 @@ from PIL import Image, ExifTags
 from tqdm import tqdm
 import shutil
 
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 for orientation in ExifTags.TAGS.keys():
     if ExifTags.TAGS[orientation] == 'Orientation':
         break
