@@ -9,6 +9,7 @@ for orientation in ExifTags.TAGS.keys():
     if ExifTags.TAGS[orientation] == 'Orientation':
         break
 
+
 def exif_size(img):
     # Returns exif-corrected PIL size
     s = img.size  # (width, height)
@@ -22,6 +23,7 @@ def exif_size(img):
         pass
 
     return s
+
 
 dataset_path = "data/ai4vn"
 if not osp.exists(dataset_path):
@@ -40,20 +42,31 @@ for set_data in ["public_train", "public_test"]:
         if file.endswith(".json"):
             with open(osp.join(path, "label", file)) as f:
                 data = json.load(f)
-                image_path = osp.join(path, "image", file.replace(".json", ".jpg"))
+                image_path = osp.join(
+                    path, "image", file.replace(".json", ".jpg"))
                 img = Image.open(image_path)
-                shutil.copy(image_path, osp.join(dataset_path, "images", s, file.replace(".json", ".jpg")))
-                w,h = exif_size(img)
+                old_w, old_h = exif_size(img)
+                img = img.resize((512, 512))
+                # shutil.copy(image_path, osp.join(dataset_path, "images", s, file.replace(".json", ".jpg")))
+                img.save(osp.join(dataset_path, "images",
+                         s, file.replace(".json", ".jpg")))
+                w, h = exif_size(img)
+
                 for box in data:
+                    box["x"] = int(box["x"] * (w/old_w))
+                    box["y"] = int(box["y"] * (h/old_h))
+                    box["w"] = int(box["w"] * (w/old_w))
+                    box["h"] = int(box["h"] * (h/old_h))
+
                     label = box['label']
                     x_mid = (box["x"]/w + box["x"]/w + box["w"]/w)/2
                     y_mid = (box["y"]/h + box["y"]/h + box["h"]/h)/2
                     w_norm = box["w"]/w
                     h_norm = box["h"]/h
-                    with open(osp.join(dataset_path, "labels", s ,file.replace(".json", ".txt")), 'a') as f:
+                    with open(osp.join(dataset_path, "labels", s, file.replace(".json", ".txt")), 'a') as f:
                         f.write(f'{label} {x_mid} {y_mid} {w_norm} {h_norm}\n')
         else:
             print("no json")
             break
 
-##commit
+# commit
