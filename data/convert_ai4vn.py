@@ -5,9 +5,6 @@ from PIL import Image, ExifTags
 from tqdm import tqdm
 import shutil
 
-from PIL import ImageFile
-ImageFile.LOAD_TRUNCATED_IMAGES = True
-
 for orientation in ExifTags.TAGS.keys():
     if ExifTags.TAGS[orientation] == 'Orientation':
         break
@@ -40,7 +37,7 @@ for set_data in ["public_train", "public_test"]:
         s = "train"
     elif set_data == "public_test":
         s = "val"
-    path = "../../input/vaipepill2022/{}/pill/".format(set_data)
+    path = "/content/drive/MyDrive/VAIPE/Dataset/{}/pill/".format(set_data)
     for file in tqdm(os.listdir(osp.join(path, "label"))):
         if file.endswith(".json"):
             with open(osp.join(path, "label", file)) as f:
@@ -48,19 +45,10 @@ for set_data in ["public_train", "public_test"]:
                 image_path = osp.join(
                     path, "image", file.replace(".json", ".jpg"))
                 img = Image.open(image_path)
-                old_w, old_h = exif_size(img)
-                img = img.resize((512, 512))
-                # shutil.copy(image_path, osp.join(dataset_path, "images", s, file.replace(".json", ".jpg")))
-                img.save(osp.join(dataset_path, "images",
-                         s, file.replace(".json", ".jpg")))
+                shutil.copy(image_path, osp.join(
+                    dataset_path, "images", s, file.replace(".json", ".jpg")))
                 w, h = exif_size(img)
-
                 for box in data:
-                    box["x"] = int(box["x"] * (w/old_w))
-                    box["y"] = int(box["y"] * (h/old_h))
-                    box["w"] = int(box["w"] * (w/old_w))
-                    box["h"] = int(box["h"] * (h/old_h))
-
                     label = box['label']
                     x_mid = (box["x"]/w + box["x"]/w + box["w"]/w)/2
                     y_mid = (box["y"]/h + box["y"]/h + box["h"]/h)/2
@@ -71,5 +59,3 @@ for set_data in ["public_train", "public_test"]:
         else:
             print("no json")
             break
-
-# commit
